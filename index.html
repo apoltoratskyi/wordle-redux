@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WordleRedux</title>
+  <script src="https://unpkg.com/react@16.7.0/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@16.7.0/umd/react-dom.development.js"></script>
+  <script>
+    window.onload = function () {
+
+      var game = new Game();
+      game.createGrid();
+      game.createKeyBoard();
+
+      function Game () {
+        this.keysArr = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+        this.buttons = [];
+        this.guesses = ['might','flood','stray'];
+        this.grid = new Array(6).fill(new Array(5).fill('')); // create array 5x6
+        this.word = 'moody';
+
+        this.createGrid = createGrid;
+        this.createKeyBoard =  createKeyBoard;
+      }
+
+      // declare object cell
+      function Cell (value, className) {
+        this.value = value;
+        this.className = className;
+      }
+
+      // create grid - array of cell objects
+      function createGrid() {
+        game.guesses.forEach((element, index) => {
+          var letterArr = [];
+          [... element].map((letter, id) => {
+            letterArr.push(new Cell(letter, setBoardClassName(letter, id)))
+          })
+          this.grid[index] = letterArr;
+        })
+      }
+
+      // create array of keyboard cell objects
+      function createKeyBoard () {
+        game.keysArr.forEach((row) => {
+          [... row].forEach((letter) => {
+            this.buttons.push(new Cell(letter, setButtonClassName(letter)))
+          })
+        })
+      }
+
+      // define className based on letter match
+      function setBoardClassName (letter, id) {
+        const match = game.word.indexOf(letter);
+        if (match !== -1) {
+          if (match === id) {
+            return "correct";
+          }
+          return "present";
+        } else {
+          return "absent";
+        }
+      }
+      // find className by searching letters matching between  in GRID object
+      function setButtonClassName (letter) {
+        let className = '';
+        game.grid.forEach((row) => {
+          row.map((cell) => {
+            if (cell) {
+              if (cell.value === letter.toLowerCase()) {
+                className = cell.className;
+              }
+            }
+          })
+        })
+        return className;
+      }
+
+      // create  board component
+      function Board (props) {
+        return React.createElement("div", {className: props.className},
+                game.grid.map((row) =>
+                      row.map((letter, j) =>
+                              React.createElement("span", {key: j, className: letter.className}, letter.value))
+              )
+        )
+      }// end on board
+
+      // create keyBoard component
+      function KeyBoard(props) {
+        return React.createElement("div", {className: props.className},
+                game.keysArr.map((row, i) => React.createElement("div", {key: i},
+                        [... row].map((letter, j) => React.createElement(
+                                "span",
+                                {key: j, className: game.buttons[
+                                        game.buttons.findIndex(item => item.value === letter)].className},
+                                letter)))
+                )
+        )
+      } // end on keyboard
+
+      function Page(props) {
+        return React.createElement("div",null,
+                React.createElement('h1', null, props.title),
+                React.createElement("hr", null, null),
+                React.createElement(Board, {className: "grid"}, null),
+                React.createElement("hr", null, null),
+                React.createElement(KeyBoard, {className: "keyboard"}, null)
+        )
+      }
+
+      ReactDOM.render(React.createElement(Page, {title:"Wordle - Redux"}, null), myapp);
+    }
+  </script>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: center;
+    }
+    hr {
+      width: 500px;
+    }
+    h1 {
+      font-size: 36px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+    .keyboard {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 50px auto;
+      width: 500px;
+      height: 250px;
+    }
+    .keyboard div{
+      display: flex;
+    }
+    .keyboard span{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 40px;
+      height: 40px;
+      margin: 5px auto;
+      margin-left: 3px;
+      margin-right: 3px;
+      border-style: solid;
+      border-width: thin;
+      border-color: #333333;
+    }
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      width: 260px;
+      margin: 20px auto;
+      text-transform: uppercase;
+    }
+    .grid span{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 40px;
+      height: 40px;
+      margin: 5px auto;
+      border-style: solid;
+      border-color: #333333;
+    }
+    .correct {
+      background-color: #6AAA64;
+      color: white;
+      border-color: white;
+    }
+    .present {
+      background-color: #C9B458;
+      color: white;
+      border-color: white;
+    }
+    .absent {
+      background-color: #787C7E;
+      color: white;
+      border-color: white;
+    }
+
+    @media (max-width: 600px)
+    {
+      .grid {
+        display: flex;
+        flex-wrap: wrap;
+        width: 360px;
+        margin: 20px auto;
+        text-transform: uppercase;
+      }
+      .grid span{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 60px;
+        height: 60px;
+        margin: 5px auto;
+        border-style: solid;
+        border-color: #333333;
+        font-size: xx-large;
+      }
+      .keyboard {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 20px auto;
+        width: 500px;
+        height: 250px;
+      }
+      .keyboard div{
+        display: flex;
+      }
+      .keyboard span{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 40px;
+        height: 50px;
+        margin: 5px auto;
+        margin-left: 1px;
+        margin-right: 1px;
+        border-style: solid;
+        border-width: thin;
+        border-color: #333333;
+        font-size: xx-large;
+      }
+    }
+    @media (max-height: 600px)
+    {
+      hr {
+        display: none;
+      }
+
+      h1 {
+        font-size: 20px;
+        font-weight: bold;
+        letter-spacing: 2px;
+      }
+      .grid {
+        display: flex;
+        float: left;
+        flex-wrap: wrap;
+        width: 360px;
+        margin: 20px auto;
+        text-transform: uppercase;
+      }
+      .grid span{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 60px;
+        height: 40px;
+        margin: 5px auto;
+        border-style: solid;
+        border-color: #333333;
+        font-size: xx-large;
+      }
+      .keyboard {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 20px auto;
+        width: 500px;
+        height: 250px;
+      }
+      .keyboard div{
+        display: flex;
+      }
+      .keyboard span{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 50px;
+        height: 50px;
+        margin: 5px auto;
+        margin-left: 1px;
+        margin-right: 1px;
+        border-style: solid;
+        border-width: thin;
+        border-color: #333333;
+        font-size: xx-large;
+      }
+    }
+
+  </style>
+</head>
+<body>
+<div id="myapp"></div>
+</body>
+</html>
